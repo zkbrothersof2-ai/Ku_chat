@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>KU·Chat — Kabul University Live Chat</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;width:100%;overflow:hidden;font-family:Arial,sans-serif;background:#0d0d1a;color:#e8e4f0;}
+.screen{display:none;height:100vh;width:100%;flex-direction:column;}
+.screen.active{display:flex;}
+#s-home,#s-invite,#s-admin{overflow-y:auto;}
+.wrap{max-width:660px;margin:0 auto;padding:28px 16px 80px;}
+.logo{text-align:center;font-size:1.9rem;font-weight:900;color:#c9a84c;letter-spacing:2px;margin-bottom:4px;}
+.logo span{color:#e8e4f0;}
+.tagline{text-align:center;color:#6860a0;font-size:.83rem;margin-bottom:24px;}
+.hero{background:#161628;border:1px solid #2a2a4a;border-radius:14px;padding:24px 18px;text-align:center;margin-bottom:20px;}
+.hero h2{font-size:1.2rem;color:#c9a84c;margin-bottom:8px;}
+.hero p{color:#6860a0;font-size:.85rem;line-height:1.6;margin-bottom:18px;}
+.hero-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.stats{display:flex;gap:10px;margin-bottom:20px;}
+.stat{flex:1;background:#161628;border:1px solid #2a2a4a;border-radius:10px;padding:12px 8px;text-align:center;}
+.sn{font-size:1.4rem;font-weight:700;color:#c9a84c;display:block;}
+.sl{font-size:.68rem;color:#6860a0;text-transform:uppercase;letter-spacing:1px;}
+.sec{font-size:.73rem;text-transform:uppercase;letter-spacing:2px;color:#6860a0;margin-bottom:10px;}
+.cc{background:#161628;border:1px solid #2a2a4a;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.cc:active{opacity:.8;}
+.cav{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#c9a84c,#f0d080);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#0d0d1a;flex-shrink:0;}
+.ci{flex:1;min-width:0;}
+.cn{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.cd{font-size:.74rem;color:#6860a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ccode{display:inline-block;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:4px;padding:1px 6px;font-size:.68rem;color:#c9a84c;font-weight:600;letter-spacing:1px;margin-top:3px;}
+.jbtn{background:#c9a84c;color:#0d0d1a;border:none;border-radius:8px;padding:8px 14px;font-size:.76rem;font-weight:700;cursor:pointer;flex-shrink:0;}
+.empty{text-align:center;padding:36px 16px;color:#6860a0;font-size:.88rem;}
+.btn{padding:10px 20px;border-radius:10px;font-size:.83rem;font-weight:700;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;justify-content:center;}
+.btn:active{opacity:.75;}
+.bg{background:linear-gradient(135deg,#c9a84c,#f0d080);color:#0d0d1a;}
+.bo{background:transparent;border:1px solid #2a2a4a;color:#e8e4f0;}
+.br{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25);color:#f87171;}
+.bf{width:100%;padding:13px;}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;align-items:flex-end;justify-content:center;}
+.ov.open{display:flex;}
+.modal{background:#161628;border:1px solid #2a2a4a;border-top-left-radius:18px;border-top-right-radius:18px;padding:26px 18px 40px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;animation:sup .3s ease;}
+@keyframes sup{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.mt{font-size:1.15rem;font-weight:700;color:#c9a84c;margin-bottom:5px;}
+.ms{font-size:.8rem;color:#6860a0;margin-bottom:20px;line-height:1.5;}
+.mc{float:right;background:none;border:none;color:#6860a0;font-size:1.3rem;cursor:pointer;margin-top:-2px;}
+.tabs{display:flex;background:rgba(255,255,255,.05);border-radius:10px;padding:3px;margin-bottom:18px;}
+.tab{flex:1;padding:8px;border:none;background:none;color:#6860a0;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:700;}
+.tab.on{background:#c9a84c;color:#0d0d1a;}
+.fld{margin-bottom:14px;}
+.fld label{display:block;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:#6860a0;margin-bottom:6px;}
+.fld input,.fld textarea{width:100%;padding:11px 13px;background:rgba(255,255,255,.06);border:1px solid #2a2a4a;border-radius:9px;color:#e8e4f0;font-size:.9rem;outline:none;font-family:Arial,sans-serif;}
+.fld input:focus,.fld textarea:focus{border-color:#c9a84c;}
+.fld textarea{resize:none;height:76px;}
+.al{padding:10px 13px;border-radius:8px;font-size:.8rem;margin-bottom:12px;display:none;line-height:1.5;}
+.al.on{display:block;}
+.ae{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.22);color:#f87171;}
+.ao{background:rgba(34,212,122,.08);border:1px solid rgba(34,212,122,.22);color:#22d47a;}
+.sp{width:13px;height:13px;border:2px solid rgba(0,0,0,.18);border-top-color:#0d0d1a;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.sp.on{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* INVITE PAGE */
+#s-invite{align-items:center;justify-content:center;}
+.icard{background:#161628;border:1px solid #2a2a4a;border-radius:18px;padding:32px 20px;width:100%;max-width:400px;margin:16px;text-align:center;}
+.iav{width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,#c9a84c,#f0d080);display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:700;color:#0d0d1a;margin:0 auto 16px;}
+.iname{font-size:1.3rem;font-weight:700;color:#c9a84c;margin-bottom:5px;}
+.iby{font-size:.78rem;color:#6860a0;margin-bottom:22px;}
+.iinput{width:100%;padding:13px;background:rgba(255,255,255,.06);border:1px solid #2a2a4a;border-radius:10px;color:#e8e4f0;font-size:.95rem;outline:none;text-align:center;margin-bottom:13px;font-family:Arial,sans-serif;}
+.iinput:focus{border-color:#c9a84c;}
+.inote{font-size:.73rem;color:#6860a0;margin-top:11px;line-height:1.6;}
+.idiv{display:flex;align-items:center;gap:10px;margin:18px 0;color:#6860a0;font-size:.75rem;}
+.idiv::before,.idiv::after{content:'';flex:1;height:1px;background:#2a2a4a;}
+
+/* CHAT SCREEN */
+#s-chat{background:#0d0d1a;}
+.ctop{background:#161628;border-bottom:1px solid #2a2a4a;height:54px;display:flex;align-items:center;gap:8px;padding:0 10px;flex-shrink:0;}
+.back{background:none;border:none;color:#6860a0;font-size:1.3rem;cursor:pointer;padding:6px;border-radius:7px;flex-shrink:0;}
+.ctav{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#c9a84c,#f0d080);display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:700;color:#0d0d1a;flex-shrink:0;}
+.cti{flex:1;min-width:0;}
+.ctn{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cts{font-size:.68rem;color:#22d47a;}
+.tacts{display:flex;gap:2px;align-items:center;}
+.ibtn{background:none;border:none;color:#6860a0;font-size:.9rem;cursor:pointer;padding:7px;border-radius:7px;white-space:nowrap;}
+.ibtn:active{background:#1e1e35;}
+
+/* NEW ROOM BUTTON in header */
+.new-room-btn{background:linear-gradient(135deg,#c9a84c,#f0d080);color:#0d0d1a;border:none;border-radius:8px;padding:6px 10px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.new-room-btn:active{opacity:.8;}
+
+/* SHARE BAR */
+.sbar{background:rgba(201,168,76,.08);border-bottom:1px solid rgba(201,168,76,.18);padding:7px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.sbar-lbl{font-size:.67rem;color:#c9a84c;flex-shrink:0;font-weight:600;}
+.sbar-txt{flex:1;font-size:.7rem;color:#c9a84c;word-break:break-all;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sbar-btn{background:#c9a84c;color:#0d0d1a;border:none;border-radius:6px;padding:5px 10px;font-size:.7rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;}
+.sbar-btn.cp{background:#22d47a;}
+
+/* MESSAGES */
+.msgs{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:3px;}
+.mrow{display:flex;gap:7px;align-items:flex-end;}
+.mrow.me{flex-direction:row-reverse;}
+.mav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;margin-bottom:2px;}
+.mbody{max-width:74%;}
+.msender{font-size:.67rem;font-weight:600;margin-bottom:2px;padding:0 3px;}
+.msender.adm{color:#c9a84c;}
+
+/* REPLY QUOTE inside bubble */
+.reply-quote{background:rgba(255,255,255,.07);border-left:3px solid #c9a84c;border-radius:5px;padding:5px 8px;margin-bottom:6px;font-size:.75rem;cursor:pointer;}
+.reply-quote .rq-name{color:#c9a84c;font-weight:700;font-size:.7rem;margin-bottom:2px;}
+.reply-quote .rq-text{color:#a0a0c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.mbubble{padding:8px 12px;border-radius:13px;font-size:.87rem;line-height:1.5;word-break:break-word;position:relative;}
+.mrow.me .mbubble{background:#1e3a5f;border-radius:13px 13px 3px 13px;}
+.mrow.other .mbubble{background:#1e1e35;border-radius:13px 13px 13px 3px;}
+.mrow.admrow .mbubble{background:rgba(201,168,76,.09);border:1px solid rgba(201,168,76,.18);}
+.mtime{font-size:.62rem;color:#6860a0;text-align:right;margin-top:2px;padding:0 3px;}
+.mdel{position:absolute;top:-7px;right:-7px;background:#f87171;border:none;border-radius:50%;width:17px;height:17px;font-size:.58rem;cursor:pointer;color:#fff;display:none;align-items:center;justify-content:center;}
+.mbubble:hover .mdel{display:flex;}
+
+/* REPLY BUTTON on hover */
+.mreply{position:absolute;top:-7px;left:-7px;background:#2a2a4a;border:none;border-radius:50%;width:22px;height:22px;font-size:.65rem;cursor:pointer;color:#c9a84c;display:none;align-items:center;justify-content:center;}
+.mrow.me .mreply{left:auto;right:20px;}
+.mbubble:hover .mreply{display:flex;}
+
+.sysmsg{text-align:center;font-size:.7rem;color:#6860a0;background:rgba(255,255,255,.03);border-radius:18px;padding:3px 12px;margin:3px auto;max-width:250px;}
+.typbar{padding:5px 14px;font-size:.73rem;color:#6860a0;min-height:24px;flex-shrink:0;}
+
+/* REPLY PREVIEW BAR (above input) */
+.reply-bar{display:none;background:#1e1e35;border-top:1px solid rgba(201,168,76,.2);padding:8px 12px;flex-shrink:0;flex-direction:row;align-items:center;gap:8px;}
+.reply-bar.show{display:flex;}
+.reply-bar-content{flex:1;min-width:0;}
+.reply-bar-name{font-size:.7rem;color:#c9a84c;font-weight:700;margin-bottom:2px;}
+.reply-bar-text{font-size:.78rem;color:#a0a0c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.reply-bar-close{background:none;border:none;color:#6860a0;font-size:1.1rem;cursor:pointer;flex-shrink:0;padding:2px 6px;}
+
+/* INPUT */
+.inrow{background:#161628;border-top:1px solid #2a2a4a;padding:9px 12px;display:flex;align-items:flex-end;gap:8px;flex-shrink:0;}
+.inwrap{flex:1;background:#1e1e35;border:1px solid #2a2a4a;border-radius:20px;padding:8px 13px;}
+.inwrap:focus-within{border-color:rgba(201,168,76,.35);}
+#minput{width:100%;background:none;border:none;outline:none;color:#e8e4f0;font-size:.88rem;font-family:Arial,sans-serif;resize:none;max-height:88px;line-height:1.4;}
+#minput::placeholder{color:#6860a0;}
+.sbtn{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#c9a84c,#f0d080);border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sbtn:active{transform:scale(.92);}
+
+/* ADMIN PANEL */
+.atop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:10px;flex-wrap:wrap;}
+.atitle{font-size:1.3rem;font-weight:700;color:#c9a84c;}
+.asub{font-size:.78rem;color:#6860a0;margin-top:3px;}
+.abtns{display:flex;gap:8px;flex-wrap:wrap;}
+.mcard{background:#161628;border:1px solid #2a2a4a;border-radius:12px;padding:15px;margin-bottom:10px;}
+.mcn{font-weight:600;font-size:.9rem;margin-bottom:5px;}
+.mcl{font-size:.72rem;color:#c9a84c;word-break:break-all;cursor:pointer;display:block;margin-bottom:6px;}
+.mcl:hover{text-decoration:underline;}
+.mca{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+
+/* TOAST */
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(100px);z-index:9999;background:#161628;border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:9px 18px;font-size:.83rem;color:#e8e4f0;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:transform .3s;white-space:nowrap;max-width:90vw;text-align:center;}
+#toast.on{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- ══ HOME ══ -->
+<div class="screen active" id="s-home">
+<div class="wrap">
+  <div class="logo">KU<span>·Chat</span></div>
+  <div class="tagline">Kabul University Live Group Chat · By Basit Khan</div>
+  <div class="hero">
+    <h2>💬 Real-Time Group Chat</h2>
+    <p>Create a chat room → share the invite link → anyone joins with just their name. No signup needed for members!</p>
+    <div class="hero-btns">
+      <button class="btn bg" onclick="openAuth('register')">✦ Create Chat Room</button>
+      <button class="btn bo" onclick="openAuth('login')">Admin Login</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><span class="sn" id="sc">—</span><span class="sl">Chats</span></div>
+    <div class="stat"><span class="sn" id="sm">—</span><span class="sl">Messages</span></div>
+    <div class="stat"><span class="sn" id="su">—</span><span class="sl">Members</span></div>
+  </div>
+  <div class="sec">Active Chat Rooms</div>
+  <div id="clist"><div class="empty">Loading chat rooms...</div></div>
+</div>
+</div>
+
+<!-- ══ INVITE ══ -->
+<div class="screen" id="s-invite">
+<div class="icard">
+  <div class="iav" id="iav">?</div>
+  <div class="iname" id="iname">Loading...</div>
+  <div class="iby" id="iby">Kabul University Chat</div>
+  <div id="ial" class="al ae"></div>
+  <input class="iinput" id="iuname" type="text" placeholder="Enter your name to join..." maxlength="24" autocomplete="off"/>
+  <button class="btn bg bf" onclick="joinInvite()">
+    <span class="sp" id="isp"></span> Join Chat Now →
+  </button>
+  <p class="inote">🔒 No account needed · Enter name and chat live!</p>
+  <div class="idiv">Admin of this room?</div>
+  <button class="btn bo bf" style="font-size:.8rem;" onclick="openAuth('login')">Admin Login</button>
+</div>
+</div>
+
+<!-- ══ CHAT ══ -->
+<div class="screen" id="s-chat">
+  <!-- Header with chat name + NEW ROOM button -->
+  <div class="ctop">
+    <button class="back" onclick="leaveChat()">←</button>
+    <div class="ctav" id="ctav">?</div>
+    <div class="cti">
+      <div class="ctn" id="ctn">Chat</div>
+      <div class="cts" id="cts">● connecting...</div>
+    </div>
+    <div class="tacts">
+      <!-- "Create Room" button visible to everyone in chat header -->
+      <button class="new-room-btn" onclick="quickCreateRoom()" title="Create your own chat room">+ New Room</button>
+      <button class="ibtn" onclick="copyInv()" title="Copy invite link">🔗</button>
+      <button class="ibtn" id="abtn" onclick="gotoAdmin()" style="display:none">⚙️</button>
+    </div>
+  </div>
+
+  <!-- Share bar -->
+  <div class="sbar">
+    <div class="sbar-lbl">📤 Invite:</div>
+    <div class="sbar-txt" id="slink">—</div>
+    <button class="sbar-btn" id="sbarbtn" onclick="copySbar()">Copy & Share</button>
+  </div>
+
+  <!-- Messages area -->
+  <div class="msgs" id="msgs"></div>
+  <div class="typbar" id="typbar"></div>
+
+  <!-- Reply preview bar -->
+  <div class="reply-bar" id="reply-bar">
+    <div style="font-size:.8rem;color:#c9a84c;flex-shrink:0;">↩️</div>
+    <div class="reply-bar-content">
+      <div class="reply-bar-name" id="rb-name">Replying to...</div>
+      <div class="reply-bar-text" id="rb-text"></div>
+    </div>
+    <button class="reply-bar-close" onclick="cancelReply()">✕</button>
+  </div>
+
+  <!-- Input -->
+  <div class="inrow">
+    <div class="inwrap">
+      <textarea id="minput" placeholder="Type a message..." rows="1" maxlength="1000"
+        oninput="autoR(this);sendTyp()"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+    </div>
+    <button class="sbtn" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<!-- ══ ADMIN ══ -->
+<div class="screen" id="s-admin">
+<div class="wrap">
+  <div class="atop">
+    <div>
+      <div class="atitle" id="atitle">My Chats</div>
+      <div class="asub" id="asub">Manage your chat rooms</div>
+    </div>
+    <div class="abtns">
+      <button class="btn bg" onclick="openCreate()">+ New Chat</button>
+      <button class="btn bo" onclick="showScreen('home');loadHome()">← Home</button>
+      <button class="btn br" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+  <div id="mclist"><div class="empty">Loading...</div></div>
+</div>
+</div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- Auth -->
+<div class="ov" id="mauth">
+<div class="modal">
+  <button class="mc" onclick="closeM('mauth')">✕</button>
+  <div class="mt">Admin Account</div>
+  <div class="ms">Register to create & manage chats. Members need no account.</div>
+  <div class="tabs">
+    <button class="tab on" id="tr" onclick="swTab('r')">Register</button>
+    <button class="tab" id="tl" onclick="swTab('l')">Login</button>
+  </div>
+  <div id="aual" class="al ae"></div>
+  <div id="fr">
+    <div class="fld"><label>Full Name</label><input id="rn" type="text" placeholder="e.g. Basit Khan"/></div>
+    <div class="fld"><label>Username</label><input id="ru" type="text" placeholder="e.g. basit_ku"/></div>
+    <div class="fld"><label>Password</label><input id="rp" type="password" placeholder="Min 6 characters"/></div>
+    <button class="btn bg bf" onclick="doReg()"><span class="sp" id="rsp"></span> Create Admin Account</button>
+  </div>
+  <div id="fl" style="display:none">
+    <div class="fld"><label>Username</label><input id="lu" type="text" placeholder="Your username"/></div>
+    <div class="fld"><label>Password</label><input id="lp" type="password" placeholder="Your password"/></div>
+    <button class="btn bg bf" onclick="doLogin()"><span class="sp" id="lsp"></span> Sign In</button>
+  </div>
+</div>
+</div>
+
+<!-- Join -->
+<div class="ov" id="mjoin">
+<div class="modal">
+  <button class="mc" onclick="closeM('mjoin')">✕</button>
+  <div class="mt" id="jtitle">Join Chat</div>
+  <div class="ms">Enter your name — no account needed!</div>
+  <div id="jal" class="al ae"></div>
+  <div class="fld"><label>Your Name</label><input id="jn" type="text" placeholder="e.g. Ahmad or Ahmad_KU" maxlength="24" autocomplete="off"/></div>
+  <button class="btn bg bf" onclick="doJoin()"><span class="sp" id="jsp"></span> Join Chat →</button>
+  <div style="margin-top:13px;padding-top:13px;border-top:1px solid #2a2a4a;text-align:center;">
+    <p style="font-size:.72rem;color:#6860a0;margin-bottom:9px;">Admin of this room?</p>
+    <button class="btn bo bf" style="font-size:.78rem;" onclick="closeM('mjoin');openAuth('login')">Admin Login</button>
+  </div>
+</div>
+</div>
+
+<!-- Create Chat -->
+<div class="ov" id="mcreate">
+<div class="modal">
+  <button class="mc" onclick="closeM('mcreate')">✕</button>
+  <div class="mt" id="create-title">Create Chat Room</div>
+  <div class="ms">Members join instantly via your shareable invite link</div>
+  <div id="cal" class="al ae"></div>
+  <div class="fld"><label>Chat Room Name</label><input id="cn" type="text" placeholder="e.g. KU Computer Science 2024" maxlength="50"/></div>
+  <div class="fld"><label>Description (optional)</label><textarea id="cd" placeholder="What is this chat about?"></textarea></div>
+  <button class="btn bg bf" onclick="doCreate()"><span class="sp" id="csp"></span> Create Chat Room ✦</button>
+</div>
+</div>
+
+<!-- Quick Join (for guests who click + New Room) -->
+<div class="ov" id="mqjoin">
+<div class="modal">
+  <button class="mc" onclick="closeM('mqjoin')">✕</button>
+  <div class="mt">Create a Chat Room</div>
+  <div class="ms">You need a free admin account to create chat rooms. It takes 30 seconds!</div>
+  <div style="display:flex;gap:10px;margin-top:4px;">
+    <button class="btn bg bf" onclick="closeM('mqjoin');openAuth('register')">✦ Register Free</button>
+    <button class="btn bo bf" onclick="closeM('mqjoin');openAuth('login')">Login</button>
+  </div>
+</div>
+</div>
+
+<script>
+let ADM=JSON.parse(localStorage.getItem("kca")||"null");
+let TOK=localStorage.getItem("kct")||null;
+let WS=null,CHAT=null,MYNAME=null,ISADM=false,JTARGET=null,INVCHAT=null;
+let mids=new Set(),ttyp=null;
+// Reply state
+let REPLY_TO=null; // {id, sender_name, text}
+
+function showScreen(n){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById("s-"+n).classList.add("active");}
+function toast(m,d=2800){const t=document.getElementById("toast");t.textContent=m;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),d);}
+function openM(id){document.getElementById(id).classList.add("open");}
+function closeM(id){document.getElementById(id).classList.remove("open");}
+function sal(id,m,t="ae"){const e=document.getElementById(id);e.textContent=m;e.className="al "+t+" on";}
+function cal(id){const e=document.getElementById(id);e.className="al ae";e.textContent="";}
+function sp(id,on){document.getElementById(id).className="sp"+(on?" on":"");}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function ft(ts){return new Date(ts*1000).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});}
+function avc(n){const c=["#e74c3c","#3498db","#2ecc71","#9b59b6","#f39c12","#1abc9c","#e67e22","#c0392b"];let h=0;for(let ch of n)h=(h*31+ch.charCodeAt(0))%c.length;return c[h];}
+function autoR(el){el.style.height="auto";el.style.height=Math.min(el.scrollHeight,88)+"px";}
+
+async function api(method,path,body,auth=false){
+  const o={method,headers:{"Content-Type":"application/json"}};
+  if(auth&&TOK)o.headers["Authorization"]="Bearer "+TOK;
+  if(body)o.body=JSON.stringify(body);
+  const r=await fetch(path,o);const d=await r.json();
+  if(!r.ok)throw new Error(d.error||"Error");return d;
+}
+
+async function loadHome(){
+  try{
+    const[s,c]=await Promise.all([api("GET","/api/stats"),api("GET","/api/chats")]);
+    document.getElementById("sc").textContent=s.chats;
+    document.getElementById("sm").textContent=s.messages;
+    document.getElementById("su").textContent=s.members;
+    const el=document.getElementById("clist");
+    if(!c.length){el.innerHTML='<div class="empty">No chat rooms yet. Be the first to create one! 💬</div>';return;}
+    el.innerHTML=c.map(x=>`
+      <div class="cc" onclick='openJM(${JSON.stringify(x)})'>
+        <div class="cav">${x.name[0].toUpperCase()}</div>
+        <div class="ci">
+          <div class="cn">${esc(x.name)}</div>
+          <div class="cd">${x.description?esc(x.description):"Kabul University Chat"}</div>
+          <span class="ccode">${x.invite_code}</span>
+        </div>
+        <button class="jbtn">Join</button>
+      </div>`).join("");
+  }catch(e){console.error(e);}
+}
+
+function openAuth(tab){cal("aual");openM("mauth");swTab(tab==="register"?"r":"l");}
+function swTab(t){
+  document.getElementById("fr").style.display=t==="r"?"block":"none";
+  document.getElementById("fl").style.display=t==="l"?"block":"none";
+  document.getElementById("tr").className="tab"+(t==="r"?" on":"");
+  document.getElementById("tl").className="tab"+(t==="l"?" on":"");
+  cal("aual");
+}
+
+async function doReg(){
+  cal("aual");
+  const name=document.getElementById("rn").value.trim();
+  const username=document.getElementById("ru").value.trim().toLowerCase();
+  const password=document.getElementById("rp").value;
+  if(!name||!username||!password)return sal("aual","Please fill all fields.");
+  if(username.length<3)return sal("aual","Username min 3 characters.");
+  if(password.length<6)return sal("aual","Password min 6 characters.");
+  if(!/^[a-z0-9_]+$/.test(username))return sal("aual","Username: letters/numbers/underscore only.");
+  sp("rsp",true);
+  try{
+    const d=await api("POST","/api/register",{name,username,password});
+    TOK=d.token;ADM=d.admin;
+    localStorage.setItem("kct",TOK);localStorage.setItem("kca",JSON.stringify(ADM));
+    closeM("mauth");toast("🎉 Welcome "+ADM.name+"! Now create your first chat room.");showAdmin();
+  }catch(e){sal("aual",e.message);}
+  sp("rsp",false);
+}
+
+async function doLogin(){
+  cal("aual");
+  const username=document.getElementById("lu").value.trim().toLowerCase();
+  const password=document.getElementById("lp").value;
+  if(!username||!password)return sal("aual","Please fill all fields.");
+  sp("lsp",true);
+  try{
+    const d=await api("POST","/api/login",{username,password});
+    TOK=d.token;ADM=d.admin;
+    localStorage.setItem("kct",TOK);localStorage.setItem("kca",JSON.stringify(ADM));
+    closeM("mauth");
+    if(INVCHAT)enterChat(INVCHAT,ADM.name,true);
+    else if(JTARGET){closeM("mjoin");enterChat(JTARGET,ADM.name,true);}
+    else{toast("✓ Welcome back, "+ADM.name+"!");showAdmin();}
+  }catch(e){sal("aual",e.message);}
+  sp("lsp",false);
+}
+
+function doLogout(){
+  TOK=null;ADM=null;
+  localStorage.removeItem("kct");localStorage.removeItem("kca");
+  showScreen("home");loadHome();toast("Logged out");
+}
+
+async function showAdmin(){
+  if(!ADM)return;
+  document.getElementById("atitle").textContent="✦ "+ADM.name;
+  document.getElementById("asub").textContent="Manage your chat rooms";
+  showScreen("admin");
+  try{
+    const c=await api("GET","/api/chats/mine",null,true);
+    const el=document.getElementById("mclist");
+    if(!c.length){el.innerHTML='<div class="empty">No chat rooms yet. Create one! 💬</div>';return;}
+    el.innerHTML=c.map(x=>{
+      const link=location.origin+"/?join="+x.invite_code;
+      return`<div class="mcard">
+        <div class="mcn">💬 ${esc(x.name)}</div>
+        <a class="mcl" onclick="cpTxt('${link}')">🔗 ${link}</a>
+        <div style="font-size:.7rem;color:#6860a0;">Code: <strong style="color:#c9a84c;">${x.invite_code}</strong></div>
+        <div class="mca">
+          <button class="btn bo" style="padding:7px 12px;font-size:.76rem;" onclick='enterChat(${JSON.stringify(x)},"${ADM.name}",true)'>Open Chat</button>
+          <button class="btn br" style="padding:7px 12px;font-size:.76rem;" onclick="delChat('${x.id}','${esc(x.name).replace(/'/g,"\\'")}')">Delete</button>
+        </div>
+      </div>`;
+    }).join("");
+  }catch(e){}
+}
+
+function gotoAdmin(){showAdmin();}
+
+function openCreate(fromChat=false){
+  cal("cal");
+  document.getElementById("cn").value="";
+  document.getElementById("cd").value="";
+  document.getElementById("create-title").textContent= fromChat ? "Create Your Own Room 🏠" : "Create Chat Room";
+  openM("mcreate");
+}
+
+async function doCreate(){
+  cal("cal");
+  const name=document.getElementById("cn").value.trim();
+  const description=document.getElementById("cd").value.trim();
+  if(!name)return sal("cal","Please enter a chat room name.");
+  sp("csp",true);
+  try{
+    const chat=await api("POST","/api/chats",{name,description},true);
+    closeM("mcreate");toast("✅ Chat room '"+chat.name+"' created!");
+    loadHome();
+    setTimeout(()=>enterChat(chat,ADM.name,true),400);
+  }catch(e){sal("cal",e.message);}
+  sp("csp",false);
+}
+
+async function delChat(id,name){
+  if(!confirm("Delete \""+name+"\"? All messages will be lost."))return;
+  try{await api("DELETE","/api/chats/"+id,null,true);toast("🗑️ Deleted");showAdmin();loadHome();}
+  catch(e){toast("❌ "+e.message);}
+}
+
+// "New Room" button from inside chat header
+function quickCreateRoom(){
+  if(ADM&&TOK){
+    openCreate(true); // admin can create directly
+  } else {
+    openM("mqjoin"); // guest → ask them to register
+  }
+}
+
+function openJM(chat){
+  JTARGET=chat;cal("jal");
+  document.getElementById("jtitle").textContent="Join: "+chat.name;
+  document.getElementById("jn").value="";
+  openM("mjoin");
+  setTimeout(()=>document.getElementById("jn").focus(),300);
+}
+
+function doJoin(){
+  cal("jal");
+  const name=document.getElementById("jn").value.trim();
+  if(!name||name.length<2)return sal("jal","Enter your name (min 2 chars).");
+  closeM("mjoin");enterChat(JTARGET,name,false);
+}
+
+async function loadInvPage(code){
+  showScreen("invite");
+  try{
+    const c=await api("GET","/api/invite/"+code);
+    INVCHAT=c;
+    document.getElementById("iav").textContent=c.name[0].toUpperCase();
+    document.getElementById("iname").textContent=c.name;
+    document.getElementById("iby").textContent="By "+c.admin_username+" · Kabul University";
+    setTimeout(()=>document.getElementById("iuname").focus(),400);
+  }catch(e){
+    document.getElementById("iname").textContent="Invalid Link";
+    sal("ial","Chat room not found. Link may be invalid.");
+  }
+}
+
+function joinInvite(){
+  cal("ial");
+  const name=document.getElementById("iuname").value.trim();
+  if(!name||name.length<2)return sal("ial","Enter your name (min 2 chars).");
+  if(!INVCHAT)return sal("ial","Invalid invite link.");
+  enterChat(INVCHAT,name,false);
+}
+
+// ═══════════════════ REPLY ═══════════════════
+function startReply(msgId,senderName,text){
+  REPLY_TO={id:msgId,sender_name:senderName,text};
+  document.getElementById("rb-name").textContent="Replying to "+senderName;
+  document.getElementById("rb-text").textContent=text;
+  document.getElementById("reply-bar").classList.add("show");
+  document.getElementById("minput").focus();
+}
+
+function cancelReply(){
+  REPLY_TO=null;
+  document.getElementById("reply-bar").classList.remove("show");
+}
+
+// ═══════════════════ CHAT ═══════════════════
+function enterChat(chat,username,asAdmin){
+  CHAT=chat;MYNAME=username;ISADM=asAdmin;mids.clear();
+  cancelReply();
+  document.getElementById("ctav").textContent=chat.name[0].toUpperCase();
+  document.getElementById("ctn").textContent=chat.name;
+  document.getElementById("cts").textContent="● connecting...";
+  document.getElementById("abtn").style.display=asAdmin?"flex":"none";
+  document.getElementById("msgs").innerHTML="";
+  document.getElementById("typbar").textContent="";
+  const link=location.origin+"/?join="+chat.invite_code;
+  document.getElementById("slink").textContent=link;
+  document.getElementById("sbarbtn").textContent="Copy & Share";
+  document.getElementById("sbarbtn").classList.remove("cp");
+  showScreen("chat");
+  if(WS){WS.close();WS=null;}
+  const proto=location.protocol==="https:"?"wss:":"ws:";
+  WS=new WebSocket(proto+"//"+location.host);
+  WS.onopen=()=>WS.send(JSON.stringify({type:"join",chatId:chat.id,username,token:asAdmin?TOK:null}));
+  WS.onmessage=e=>handleMsg(JSON.parse(e.data));
+  WS.onclose=()=>{document.getElementById("cts").textContent="● disconnected";addSys("Disconnected.");};
+  WS.onerror=()=>addSys("Connection error.");
+  setTimeout(()=>document.getElementById("minput").focus(),400);
+}
+
+function handleMsg(d){
+  if(d.type==="history"){document.getElementById("msgs").innerHTML="";mids.clear();d.messages.forEach(m=>addMsg(m));scrollD();}
+  else if(d.type==="message"){if(mids.has(d.id))return;mids.add(d.id);addMsg(d);scrollD();}
+  else if(d.type==="message_deleted"){const e=document.getElementById("msg-"+d.id);if(e)e.remove();}
+  else if(d.type==="system"){addSys(d.msg);scrollD();}
+  else if(d.type==="online"){document.getElementById("cts").textContent="● "+d.count+" online";}
+  else if(d.type==="typing"){showTyp(d.username);}
+  else if(d.type==="error"){toast("❌ "+d.msg);}
+}
+
+function addMsg(m){
+  const self=m.sender_name===MYNAME,adm=m.sender_type==="admin";
+  const area=document.getElementById("msgs");
+  const r=document.createElement("div");
+  r.className="mrow "+(self?"me":"other")+(adm?" admrow":"");
+  r.id="msg-"+m.id;
+  const col=avc(m.sender_name),ini=m.sender_name[0].toUpperCase();
+
+  // Build reply quote if message has a reply
+  let replyHTML="";
+  if(m.reply_to_id && m.reply_to_name && m.reply_to_text){
+    replyHTML=`<div class="reply-quote" onclick="scrollToMsg('${esc(m.reply_to_id)}')">
+      <div class="rq-name">${esc(m.reply_to_name)}</div>
+      <div class="rq-text">${esc(m.reply_to_text)}</div>
+    </div>`;
+  }
+
+  r.innerHTML=
+    (!self?`<div class="mav" style="background:${col}">${ini}</div>`:"")
+    +`<div class="mbody">
+      ${!self?`<div class="msender${adm?" adm":""}">${esc(m.sender_name)}${adm?" 👑":""}</div>`:""}
+      <div class="mbubble">
+        ${replyHTML}
+        ${esc(m.text)}
+        <button class="mreply" onclick="startReply('${m.id}','${esc(m.sender_name).replace(/'/g,"\\'")}',${JSON.stringify(m.text)})" title="Reply">↩</button>
+        ${ISADM?`<button class="mdel" onclick="delMsg('${m.id}')">✕</button>`:""}
+      </div>
+      <div class="mtime">${ft(m.created_at)}</div>
+    </div>`
+    +(self?`<div class="mav" style="background:${col}">${ini}</div>`:"");
+  area.appendChild(r);
+}
+
+function scrollToMsg(id){
+  const el=document.getElementById("msg-"+id);
+  if(el){el.scrollIntoView({behavior:"smooth",block:"center"});el.style.outline="2px solid #c9a84c";setTimeout(()=>el.style.outline="",1200);}
+}
+
+function addSys(t){const e=document.createElement("div");e.className="sysmsg";e.textContent=t;document.getElementById("msgs").appendChild(e);}
+function scrollD(){const a=document.getElementById("msgs");a.scrollTop=a.scrollHeight;}
+
+function sendMsg(){
+  const inp=document.getElementById("minput"),t=inp.value.trim();
+  if(!t||!WS||WS.readyState!==1)return;
+  const payload={type:"message",text:t};
+  if(REPLY_TO){
+    payload.reply_to_id=REPLY_TO.id;
+    payload.reply_to_name=REPLY_TO.sender_name;
+    payload.reply_to_text=REPLY_TO.text.substring(0,80);
+  }
+  WS.send(JSON.stringify(payload));
+  inp.value="";inp.style.height="auto";
+  cancelReply();
+}
+
+function delMsg(id){if(WS&&WS.readyState===1)WS.send(JSON.stringify({type:"delete_message",msgId:id}));}
+
+let tto;
+function sendTyp(){if(!WS||WS.readyState!==1)return;WS.send(JSON.stringify({type:"typing"}));}
+function showTyp(u){
+  if(u===MYNAME)return;
+  document.getElementById("typbar").textContent=u+" is typing...";
+  clearTimeout(tto);tto=setTimeout(()=>document.getElementById("typbar").textContent="",2500);
+}
+
+function leaveChat(){
+  if(WS){WS.close();WS=null;}
+  CHAT=null;MYNAME=null;cancelReply();
+  if(ADM)showAdmin();else{showScreen("home");loadHome();}
+}
+
+function copyInv(){
+  if(!CHAT)return;
+  const l=location.origin+"/?join="+CHAT.invite_code;
+  navigator.clipboard.writeText(l);
+  toast("🔗 Invite link copied! Share it with your group.");
+}
+
+function copySbar(){
+  if(!CHAT)return;
+  const l=location.origin+"/?join="+CHAT.invite_code;
+  navigator.clipboard.writeText(l);
+  const b=document.getElementById("sbarbtn");
+  b.textContent="✓ Copied!";b.classList.add("cp");
+  setTimeout(()=>{b.textContent="Copy & Share";b.classList.remove("cp");},2000);
+  toast("🔗 Copied! Share on KU Facebook 🎓");
+}
+
+function cpTxt(t){navigator.clipboard.writeText(t);toast("🔗 Link copied!");}
+
+document.getElementById("iuname").addEventListener("keydown",e=>{if(e.key==="Enter")joinInvite();});
+document.getElementById("jn").addEventListener("keydown",e=>{if(e.key==="Enter")doJoin();});
+
+(function(){
+  const p=new URLSearchParams(location.search);
+  const j=p.get("join");
+  if(j)loadInvPage(j);
+  else if(ADM&&TOK)showAdmin();
+  else{showScreen("home");loadHome();}
+})();
+</script>
+</body>
+</html>
